@@ -31,6 +31,7 @@ def getLastestNews(companyUrl,xpaths):
             pass
 
 def CustomizegetLastestNews(companyUrl,xpaths,datepath,linkpath,news_display):
+
     response = requests.get(companyUrl)
     response.raise_for_status()
 
@@ -40,7 +41,7 @@ def CustomizegetLastestNews(companyUrl,xpaths,datepath,linkpath,news_display):
 
     story_dates = [date.text_content().strip() for date in story_dates]
     links = [link.get("href") for link in links]
-
+    print(links)
     for index,link in enumerate(links):
         try:
             url = f"https://economictimes.indiatimes.com/{link}"
@@ -63,7 +64,12 @@ def CustomizegetLastestNews(companyUrl,xpaths,datepath,linkpath,news_display):
                 news_display.config(state=tk.DISABLED)
                 return 
         except:
-            pass
+                pass
+        formatted_content="404 Error"
+        news_display.config(state=tk.NORMAL)
+        news_display.delete('1.0', tk.END)
+        news_display.insert(tk.END, formatted_content)
+        news_display.config(state=tk.DISABLED)
 
 if __name__ == "__main__":
     link = "https://economictimes.indiatimes.com/hdfc-bank-ltd/stocksupdate/companyid-9195.cms"
