@@ -1,56 +1,44 @@
-import yfinance as yf
-import pandas_ta as ta
-import matplotlib.pyplot as plt
+def analyze_trend(stock):
+    import yfinance as yf
+    import matplotlib.pyplot as plt
 
-def get_stock_data(ticker, period):
-    stock_data = yf.Ticker(ticker).history(period=period)
-    return stock_data
+    # Replace 'AAPL' with the ticker symbol of the stock you want to analyze
+    ticker = stock
 
-def analyze_trend(data):
-    data['SMA_50'] = data['Close'].rolling(window=50).mean()
-    data['SMA_200'] = data['Close'].rolling(window=200).mean()
+    # Fetch data from Yahoo Finance
+    stock_data = yf.download(ticker, start='2023-01-01', end='2023-12-31')
 
-    if data['SMA_50'].iloc[-1] > data['SMA_200'].iloc[-1]:
-        return 'bullish'
-    else:
-        return 'bearish'
+    # Calculate moving averages
+    short_window = 10
+    long_window = 50
 
+    stock_data['Short_MA'] = stock_data['Close'].rolling(window=short_window).mean()
+    stock_data['Long_MA'] = stock_data['Close'].rolling(window=long_window).mean()
 
-def plot_stock_data(data, current_trend, monthly_trend, yearly_trend):
+    # Plotting
     plt.figure(figsize=(12, 6))
-    plt.plot(data['Close'], label='Close Price', color='blue')
-    plt.plot(data['SMA_50'], label='50-day SMA', color='orange')
-    plt.plot(data['SMA_200'], label='200-day SMA', color='green')
-    
-    plt.title('Stock Price and Moving Averages')
+    plt.plot(stock_data['Close'], label='Close Price')
+    plt.plot(stock_data['Short_MA'], label='Short MA (10-day)')
+    plt.plot(stock_data['Long_MA'], label='Long MA (50-day)')
+    plt.title(f'{ticker} Stock Price with Moving Averages')
     plt.xlabel('Date')
     plt.ylabel('Price')
     plt.legend()
+    plt.grid(True)
 
-    # Add trend annotations
-    plt.annotate(f'Current Trend: {current_trend}', 
-                 xy=(data.index[-1], data['Close'].iloc[-1]),
-                 xytext=(-20, 20),
-                 textcoords='offset points',
-                 fontsize=10,
-                 fontweight='bold',
-                 color='purple')
+    # Determine the trend based on moving average crossovers
+    if stock_data['Short_MA'].iloc[-1] > stock_data['Long_MA'].iloc[-1]:
+        trend = "Bullish Trend"
+        color = 'green'
+    elif stock_data['Short_MA'].iloc[-1] < stock_data['Long_MA'].iloc[-1]:
+        trend = "Bearish Trend"
+        color = 'red'
+    else:
+        trend = "Indecisive Trend"
+        color = 'black'
 
-    plt.annotate(f'1-Month Trend: {monthly_trend}', 
-                 xy=(data.index[-1], data['Close'].iloc[-1] - 10),  # Adjusting vertical position
-                 xytext=(-20, 20),
-                 textcoords='offset points',
-                 fontsize=10,
-                 fontweight='bold',
-                 color='blue')  
-
-    plt.annotate(f'Yearly Trend: {yearly_trend}', 
-                 xy=(data.index[-1], data['Close'].iloc[-1] - 20),  # Adjusting vertical position
-                 xytext=(-20, 20),
-                 textcoords='offset points',
-                 fontsize=10,
-                 fontweight='bold',
-                 color='red')  
+    # Annotate the current trend on the plot
+    plt.text(stock_data.index[-1], stock_data['Close'].iloc[-1], trend, fontsize=12, ha='right', color=color)
 
     plt.show()
 
@@ -64,18 +52,5 @@ def trend(stock):
     else:
         print("Enter Correct Stock Symbol")
         return
-    
-    one_month_data = get_stock_data(ticker, '1mo')
-    one_month_trend = analyze_trend(one_month_data)
+    analyze_trend(ticker)
 
-    yearly_data = get_stock_data(ticker, '1y')
-    yearly_trend = analyze_trend(yearly_data)
-
-    print(f"1-Month Trend for {ticker} (Last 30 days): {one_month_trend}")
-    print(f"Yearly Trend for {ticker} (Last 365 days): {yearly_trend}")
-
-    # Plotting the stock data with current trend annotation
-    plot_stock_data(yearly_data, yearly_trend, one_month_trend, yearly_trend)
-
-
-# Example usage
