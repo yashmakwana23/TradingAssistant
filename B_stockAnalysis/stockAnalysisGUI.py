@@ -4,8 +4,9 @@ import sys
 import threading
 sys.path.append(".")  
 import subprocess
+
 def PricePrediction():
-    subprocess.Popen(['python','B_stockAnalysis\Prediction\PricePrediction.py']) 
+    subprocess.Popen(['python','B_stockAnalysis\Prediction\PricePredictionClose.py']) 
 
 def TrendAnalysis(stockName):
     from B_stockAnalysis.trendAnalysis import trend
